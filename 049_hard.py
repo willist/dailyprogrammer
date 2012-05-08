@@ -1,4 +1,6 @@
+import sys
 from collections import defaultdict
+from contextlib import contextmanager
 from itertools import product
 from math import factorial
 
@@ -16,6 +18,13 @@ def count_sums(iterator):
 
 def dice_sums(n):
     return count_sums(product(*dice_iter(n)))
+
+@contextmanager
+def no_recursion_limit():
+    limit = sys.getrecursionlimit()
+    sys.setrecursionlimit(100000)
+    yield
+    sys.setrecursionlimit(limit)
 
 def combos(num_dice, target_sum, prev_die=None):
     if num_dice == 1 and prev_die <= target_sum <= 6:
@@ -39,12 +48,15 @@ def counter(iterator):
 def j(num_dice, sum_dice):
     total = 0
     top = factorial(num_dice)
-    for combo in combos(num_dice, sum_dice):
-        count = counter(combo)
-        bottoms = [factorial(c) for c in count.values()]
-        bottom = reduce(lambda x,y: x*y, bottoms)
-        sub_total = top/bottom
-        total += sub_total
+    with no_recursion_limit():
+        for index, combo in enumerate(combos(num_dice, sum_dice)):
+            count = counter(combo)
+            bottoms = [factorial(c) for c in count.values()]
+            bottom = reduce(lambda x,y: x*y, bottoms)
+            sub_total = top/bottom
+            if not index % 100000:
+                print combo, sub_total
+            total += sub_total
     return total
         
 
@@ -57,4 +69,4 @@ if __name__ == "__main__":
     assert j(07, 30) == 12117
     assert j(10, 50) == 85228
     print j(20, 100)
-    #print j(1100, 5000) % pow(10,7)
+    print j(1100, 5000) % pow(10,7)
