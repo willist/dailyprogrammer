@@ -1,6 +1,6 @@
-from pprint import pprint
 from collections import defaultdict
-from itertools import product, permutations
+from itertools import product
+from math import factorial
 
 def dice_iter(n):
     for item in range(n):
@@ -17,16 +17,6 @@ def count_sums(iterator):
 def dice_sums(n):
     return count_sums(product(*dice_iter(n)))
 
-def f(num_dice, sum_dice):
-    sums = dice_sums(num_dice)
-    return sums[sum_dice]
-
-#for x in range(10):
-    #print "=" * 30, x, "=" * 30
-    #sums = dice_sums(x)
-    #for key in sorted(sums.keys()):
-        #print key, sums[key]
-
 def combos(num_dice, target_sum, prev_die=None):
     if num_dice == 1 and prev_die <= target_sum <= 6:
         yield [target_sum]
@@ -40,20 +30,31 @@ def combos(num_dice, target_sum, prev_die=None):
                 for tail in combos(remaining_dice, remaining_sum, head):
                     yield [head] + tail
 
-def fact(iterator):
-    return 'blah'
+def counter(iterator):
+    counter = defaultdict(int)
+    for item in iterator:
+        counter[item] += 1
+    return counter
 
-def g(num_dice, sum_dice):
-    print sum(len(set(permutations(item))) 
-        for item in combos(num_dice, sum_dice))
-
-def h(num_dice, sum_dice):
+def j(num_dice, sum_dice):
     total = 0
-    for item in combos(num_dice, sum_dice):
-        current = len(set(permutations(item)))
-        print item, current 
-        total += current
-    print total
+    top = factorial(num_dice)
+    for combo in combos(num_dice, sum_dice):
+        count = counter(combo)
+        bottoms = [factorial(c) for c in count.values()]
+        bottom = reduce(lambda x,y: x*y, bottoms)
+        sub_total = top/bottom
+        total += sub_total
+    return total
+        
 
 if __name__ == "__main__":
-    h(20, 100)
+    assert j(02, 07) == 6
+    assert j(02, 10) == 3
+    assert j(02, 12) == 1
+    assert j(03, 10) == 27
+    assert j(05, 20) == 651
+    assert j(07, 30) == 12117
+    assert j(10, 50) == 85228
+    print j(20, 100)
+    #print j(1100, 5000) % pow(10,7)
