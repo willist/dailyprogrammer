@@ -1,6 +1,6 @@
 from pprint import pprint
 from collections import defaultdict
-from itertools import product
+from itertools import product, permutations
 
 def dice_iter(n):
     for item in range(n):
@@ -43,4 +43,17 @@ def combos(num_dice, target_sum, prev_die=None):
 def fact(iterator):
     return 'blah'
 
-print list(combos(5, 20))
+def g(num_dice, sum_dice):
+    print sum(len(set(permutations(item))) 
+        for item in combos(num_dice, sum_dice))
+
+def h(num_dice, sum_dice):
+    total = 0
+    for item in combos(num_dice, sum_dice):
+        current = len(set(permutations(item)))
+        print item, current 
+        total += current
+    print total
+
+if __name__ == "__main__":
+    h(20, 100)
